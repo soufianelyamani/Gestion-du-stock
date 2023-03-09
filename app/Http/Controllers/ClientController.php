@@ -12,16 +12,24 @@ class ClientController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    // public function __construct()
-    //     {
-    //     $this->authorizeResource(Client::class, 'clients');
-    //     }
-    public function index()
+    public function __construct()
+        {
+        $this->authorizeResource(Client::class, 'client');
+        }
+
+    public function index(Request $request)
     {
-        $clients = Client::paginate(5);
-        Paginator::useBootstrap();
-        return view('clients.index', [ 'clients' => $clients ]);
+        if($request->ajax())
+        {
+            $client=Client::where('nom','LIKE','%'.$request->search."%")->get();
+            return Response(view('clients.search', [ 'clients' => $client ]));
+        } else {
+            $clients = Client::paginate(5);
+            Paginator::useBootstrap();
+            return view('clients.index', [ 'clients' => $clients ]);
+        }
     }
+
     public function search(Request $request)
             {
                 
@@ -30,8 +38,9 @@ class ClientController extends Controller
                 
             $output="";
             $client=Client::where('nom','LIKE','%'.$request->search."%")->get();
+            return Response(view('clients.search', [ 'clients' => $client ]));
             // $client=DB::table('clients')->where('prenom','LIKE','%'.$request->search."%")->get();
-            if($client)
+            /*if($client)
             {
             foreach ($client as $key =>$clients ) {
                 $csrf =csrf_token();
@@ -66,7 +75,7 @@ class ClientController extends Controller
             '</tr>';
             }
             return Response($output);
-            }
+            }*/
             }
             }
 

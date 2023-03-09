@@ -58,7 +58,7 @@ class userController extends Controller
             'type' => $request->type
             
 
-    ]);
+        ]);
     
     $user->save();
 
@@ -95,12 +95,34 @@ class userController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, user $user)
+    // public function update(Request $request, user $user)
+    // {
+    //     $user->fill($request->post())->save();
+    //     return redirect()->route('users.index',['user' => $user])->with('status', 'Successful Update');
+    // }
+    public function update(Request $request)
     {
-        $user->fill($request->post())->save();
-        return redirect()->route('users.index',['user' => $user])->with('status', 'Successful Update');
+            # Validation
+            $request->validate([
+                'old_password' => 'required',
+                'new_password' => 'required|confirmed',
+            ]);
+    
+    
+            #Match The Old Password
+            if(!Hash::check($request->old_password, auth()->user()->password)){
+                return back()->with("error", "Old Password Doesn't match!");
+            }
+    
+    
+            #Update the new Password
+            User::whereId(auth()->user()->id)->update([
+                'password' => Hash::make($request->new_password)
+            ]);
+    
+            return back()->with("status", "Password changed successfully!");
     }
-
+    
     /**
      * Remove the specified resource from storage.
      *
